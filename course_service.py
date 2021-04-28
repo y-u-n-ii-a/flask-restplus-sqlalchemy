@@ -19,10 +19,17 @@ class CourseModel(db.Model):
     def __repr__(self):
         return '<Course %r>' % self.id
 
-# TODO: correct serialization
+    # TODO: correct serialization
     def serialize(self):
         return {'name': self.name,
                 'start_date': self.start_date,
                 'end_date': self.end_date,
                 'number_of_lectures': self.number_of_lectures
                 }
+
+
+def serialize_list(courses):
+    courses_list = []
+    for course in courses:
+        courses_list.append(course.serialize)
+    return courses_list

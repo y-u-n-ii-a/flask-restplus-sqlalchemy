@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_restplus import Api, Resource, fields
 from db import db
-from course_service import CourseModel
+from course_service import CourseModel, serialize_list
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -31,8 +31,8 @@ course_model = api.model('Course', {
 class CourseList(Resource):
     @api.doc('Get list of courses')
     def get(self):
-        all_courses = db.session.query(CourseModel).first()
-        return jsonify(all_courses.serialize())
+        all_courses = db.session.query(CourseModel).all()
+        return jsonify(serialize_list(all_courses))
 
     @api.doc('Delete all courses')
     def delete(self):
@@ -51,7 +51,7 @@ class CourseList(Resource):
         new_course = CourseModel(name, start_date, end_date, number_of_lectures)
         db.session.add(new_course)
         db.session.commit()
-        pass
+        return 200
 
 
 # TODO: handle error if the element doesn't exist
@@ -67,13 +67,14 @@ class Course(Resource):
     def put(self, id):
         course = CourseModel.query.get(id)
 
+        # TODO: provide for the addition of not all fields
         course.name = request.json['name']
         course.start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
         course.end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
         course.number_of_lectures = request.json['number_of_lectures']
 
         db.session.commit()
-        pass
+        return 200
 
     @api.doc('Delete course by id', params={'id': 'Id'})
     def delete(self, id):
