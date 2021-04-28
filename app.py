@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, request, jsonify
 from flask_restplus import Api, Resource, fields
 from db import db
@@ -13,8 +15,8 @@ db.init_app(app)
 course_model = api.model('Course', {
     'id': fields.Integer(readonly=True),
     'name': fields.String(),
-    # 'start_date': fields.Date(),
-    # 'end_date': fields.Date(),
+    'start_date': fields.Date(),
+    'end_date': fields.Date(),
     'number_of_lectures': fields.Integer
 })
 
@@ -36,11 +38,11 @@ class CourseList(Resource):
     @api.expect(course_model)
     def post(self):
         name = request.json['name']
-        # start_date = request.json['start_date']
-        # end_date = request.json['end_date']
+        start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
+        end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
         number_of_lectures = request.json['number_of_lectures']
 
-        new_course = CourseModel(name, number_of_lectures)
+        new_course = CourseModel(name, start_date, end_date, number_of_lectures)
         db.session.add(new_course)
         db.session.commit()
         pass
@@ -60,8 +62,8 @@ class Course(Resource):
         course = CourseModel.query.get(id)
 
         course.name = request.json['name']
-        # course.start_date = request.json['start_date']
-        # course.end_date = request.json['end_date']
+        course.start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
+        course.end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
         course.number_of_lectures = request.json['number_of_lectures']
 
         db.session.commit()

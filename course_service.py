@@ -10,10 +10,10 @@ class CourseModel(db.Model):
     end_date = db.Column(db.Date)
     number_of_lectures = db.Column(db.Integer)
 
-    def __init__(self, name, number_of_lectures):
+    def __init__(self, name, start_date, end_date, number_of_lectures):
         self.name = name
-        # self.start_date = start_date
-        # self.end_date = end_date
+        self.start_date = start_date
+        self.end_date = end_date
         self.number_of_lectures = number_of_lectures
 
     def __repr__(self):
@@ -22,5 +22,7 @@ class CourseModel(db.Model):
 # TODO: correct serialization
     def serialize(self):
         return {'name': self.name,
+                'start_date': self.start_date,
+                'end_date': self.end_date,
                 'number_of_lectures': self.number_of_lectures
                 }
