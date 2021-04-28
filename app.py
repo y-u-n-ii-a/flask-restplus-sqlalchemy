@@ -3,14 +3,9 @@ from flask_restplus import Api, Resource, fields
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-# basedir = os.path.dirname(__file__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'courses.sqlite')
+app.config.from_pyfile('config.py')
 
-app.config["DEBUG"] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///courses.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 api = Api(app)
-
 db = SQLAlchemy(app)
 
 
