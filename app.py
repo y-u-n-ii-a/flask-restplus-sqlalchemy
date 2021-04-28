@@ -85,6 +85,14 @@ class Course(Resource):
     @api.doc('Change course', params={'id': 'Id'})
     @api.expect(course_model)
     def put(self, id):
+        course = CourseModel.query.get(id)
+
+        course.name = request.json['name']
+        # course.start_date = request.json['start_date']
+        # course.end_date = request.json['end_date']
+        course.number_of_lectures = request.json['number_of_lectures']
+
+        db.session.commit()
         pass
 
     @api.doc('Delete course by id', params={'id': 'Id'})
