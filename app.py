@@ -32,11 +32,10 @@ class CourseModel(db.Model):
     def __repr__(self):
         return '<Course %r>' % self.id
 
-    def get_dict(self):
-        return {
-            'name': self.name,
-            'number_of_lectures': self.number_of_lectures
-        }
+    def serialize(self):
+        return {'name': self.name,
+                'number_of_lectures': self.number_of_lectures
+                }
 
 
 course_model = api.model('Course', {
@@ -53,7 +52,7 @@ class CourseList(Resource):
     @api.doc('Get list of courses')
     def get(self):
         all_courses = db.session.query(CourseModel).first()
-        return jsonify(all_courses.get_dict())
+        return jsonify(all_courses.serialize())
 
     @api.doc('Delete all courses')
     def delete(self):
@@ -80,7 +79,7 @@ class Course(Resource):
     @api.doc('Get course by id', params={'id': 'Id'})
     def get(self, id):
         course = db.session.query(CourseModel).get(id)
-        return jsonify(course.get_dict())
+        return jsonify(course.serialize())
 
     @api.doc('Change course', params={'id': 'Id'})
     @api.expect(course_model)
