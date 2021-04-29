@@ -1,7 +1,9 @@
 from datetime import datetime
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 from flask_restplus import Api, Resource, fields
+
+from course_service import CourseModel, serialize_list, deserialize
 from db import db
 
 app = Flask(__name__)
@@ -31,21 +33,20 @@ course_model = api.model('Course', {
 class CourseList(Resource):
     @ns.doc('Get list of courses')
     def get(self):
-        all_courses = db.session.query(CourseModel).all()
-        return jsonify(serialize_list(all_courses))
+        courses_list = []
+        courses_list.extend(db.session.query(CourseModel).all())
+        return jsonify(serialize_list(courses_list))
 
     @ns.doc('Add new course')
     @ns.expect(course_model)
     def post(self):
-        name = request.json['name']
-        start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
-        end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
-        number_of_lectures = request.json['number_of_lectures']
-
-        new_course = CourseModel(name, start_date, end_date, number_of_lectures)
-        db.session.add(new_course)
-        db.session.commit()
-        return 200
+        try:
+            new_course = deserialize(request)
+            db.session.add(new_course)
+            db.session.commit()
+            pass
+        except:
+            return abort(400)
 
 
 # TODO: handle error if the element doesn't exist
@@ -54,7 +55,10 @@ class Course(Resource):
     @ns.doc('Get course by id', params={'id': 'Id'})
     def get(self, id):
         course = db.session.query(CourseModel).get(id)
-        return jsonify(course.serialize())
+        if course is not None:
+            return jsonify(course.serialize())
+        else:
+            abort(404)
 
     @ns.doc('Change course', params={'id': 'Id'})
     @ns.expect(course_model)
@@ -68,14 +72,28 @@ class Course(Resource):
         course.number_of_lectures = request.json['number_of_lectures']
 
         db.session.commit()
-        return 200
+        return jsonify(
+            message=f"Course #{id} updated successfully.",
+            category="success",
+            status=200
+        )
 
     @ns.doc('Delete course by id', params={'id': 'Id'})
     def delete(self, id):
         db.session.query(CourseModel).filter(CourseModel.id == id).delete()
         db.session.commit()
 
-        return 200
+        return jsonify(
+            message=f"Course #{id} deleted successfully.",
+            category="success",
+            status=200
+        )
+
+
+#
+# @ns.errorhandler(exception=exceptions.NotFound)
+# def course_not_found(error):
+#     return jsonify({'message': 'Not found', 'code': '404'})
 
 
 if __name__ == '__main__':
