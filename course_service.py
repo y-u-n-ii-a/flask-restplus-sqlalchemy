@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from db import db
 
 
@@ -28,8 +30,16 @@ class CourseModel(db.Model):
                 }
 
 
+def deserialize(request):
+    name = request.json['name']
+    start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
+    end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
+    number_of_lectures = request.json['number_of_lectures']
+    return CourseModel(name, start_date, end_date, number_of_lectures)
+
+
 def serialize_list(courses):
-    courses_list = []
+    courses_list = {}
     for course in courses:
-        courses_list.append(course.serialize)
+        courses_list['Course %r' % course.id] = course.serialize()
     return courses_list
