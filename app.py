@@ -3,7 +3,6 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_restplus import Api, Resource, fields
 from db import db
-from course_service import CourseModel, serialize_list
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -17,6 +16,7 @@ def create_tables():
 api = Api(app)
 db.init_app(app)
 
+ns = api.namespace('courses', description='Courses operations')
 
 course_model = api.model('Course', {
     'id': fields.Integer(readonly=True),
@@ -27,21 +27,15 @@ course_model = api.model('Course', {
 })
 
 
-@api.route('/course')
+@ns.route('/')
 class CourseList(Resource):
-    @api.doc('Get list of courses')
+    @ns.doc('Get list of courses')
     def get(self):
         all_courses = db.session.query(CourseModel).all()
         return jsonify(serialize_list(all_courses))
 
-    @api.doc('Delete all courses')
-    def delete(self):
-        db.session.query(CourseModel).delete()
-        db.session.commit()
-        return 200
-
-    @api.doc('Add new course')
-    @api.expect(course_model)
+    @ns.doc('Add new course')
+    @ns.expect(course_model)
     def post(self):
         name = request.json['name']
         start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
@@ -55,15 +49,15 @@ class CourseList(Resource):
 
 
 # TODO: handle error if the element doesn't exist
-@api.route('/course/<int:id>')
+@ns.route('/<int:id>')
 class Course(Resource):
-    @api.doc('Get course by id', params={'id': 'Id'})
+    @ns.doc('Get course by id', params={'id': 'Id'})
     def get(self, id):
         course = db.session.query(CourseModel).get(id)
         return jsonify(course.serialize())
 
-    @api.doc('Change course', params={'id': 'Id'})
-    @api.expect(course_model)
+    @ns.doc('Change course', params={'id': 'Id'})
+    @ns.expect(course_model)
     def put(self, id):
         course = CourseModel.query.get(id)
 
@@ -76,7 +70,7 @@ class Course(Resource):
         db.session.commit()
         return 200
 
-    @api.doc('Delete course by id', params={'id': 'Id'})
+    @ns.doc('Delete course by id', params={'id': 'Id'})
     def delete(self, id):
         db.session.query(CourseModel).filter(CourseModel.id == id).delete()
         db.session.commit()
