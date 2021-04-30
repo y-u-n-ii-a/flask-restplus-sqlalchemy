@@ -1,7 +1,7 @@
 from typing import List
 
-from db import db
 from course_model1 import CourseModel as Course, deserialize
+from db import db
 
 
 class CourseService:

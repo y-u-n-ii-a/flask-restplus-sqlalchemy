@@ -1,11 +1,9 @@
-from datetime import datetime
-
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify
 from flask_restplus import Api, Resource, fields
 
-from course_model1 import serialize_list, deserialize
-from db import db
+from course_model1 import serialize_list
 from course_service import CourseService
+from db import db
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -14,6 +12,7 @@ app.config.from_pyfile('config.py')
 @app.before_first_request
 def create_tables():
     db.create_all()
+
 
 # TODO: add marshmallow
 # TODO: add blueprints
