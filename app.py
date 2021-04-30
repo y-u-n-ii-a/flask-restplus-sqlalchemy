@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_restplus import Api, Resource, fields
 
-from course_model1 import serialize_list
-from course_service import CourseService
+from course.course_service import CourseService
 from db import db
+from ma import ma
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -14,15 +14,16 @@ def create_tables():
     db.create_all()
 
 
-# TODO: add marshmallow
 # TODO: add blueprints
+# TODO: add unittests
 
 api = Api(app)
 db.init_app(app)
+ma.init_app(app)
 
 ns = api.namespace('courses', description='Courses operations')
 
-course_model = api.model('Course', {
+course_expected_model = api.model('Course', {
     'id': fields.Integer(readonly=True),
     'name': fields.String(),
     'start_date': fields.Date(),
@@ -35,17 +36,15 @@ course_model = api.model('Course', {
 class CourseListResource(Resource):
     @ns.doc('Get list of courses')
     def get(self):
-        return jsonify(serialize_list(CourseService.get_all()))
+        return CourseService.get_all()
 
     @ns.doc('Add new course')
-    @ns.expect(course_model)
+    @ns.expect(course_expected_model)
     def post(self):
-        print(request.data)
-        return jsonify(CourseService.create(request).serialize())
+        return CourseService.create(request)
 
 
 # TODO: add the last request
-
 # @ns.route('/<name>')
 # class D(Resource):
 #     def get(self, name, start_date, end_date):
@@ -58,20 +57,12 @@ class CourseListResource(Resource):
 class CourseResource(Resource):
     @ns.doc('Get course by id', params={'id': 'Id'})
     def get(self, id):
-        return jsonify(CourseService.get_by_id(id))
+        return CourseService.get_by_id(id)
 
-    # @ns.doc('Change course', params={'id': 'Id'})
-    # @ns.expect(course_model)
-    # def put(self, id):
-    #     course = db.session.query(CourseModel).filter(CourseModel.id == id).first_or_404()
-    #
-    #     # TODO: provide for the addition of not all fields
-    #     course.name = request.json['name']
-    #     course.start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
-    #     course.end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
-    #     course.number_of_lectures = request.json['number_of_lectures']
-    #
-    #     db.session.commit()
+    @ns.doc('Change course', params={'id': 'Id'})
+    @ns.expect()
+    def put(self, id):
+        pass
 
     @ns.doc('Delete course by id', params={'id': 'Id'})
     def delete(self, id):
@@ -79,10 +70,10 @@ class CourseResource(Resource):
         return jsonify(dict(status='Success', id=id))
 
 
-# TODO: add error handling
-# @ns.errorhandler(exception=exceptions.NotFound)
+# # TODO: add error handling
+# @ns.errorhandler(marshmallow.exceptions.ValidationError)
 # def course_not_found(error):
-#     return jsonify({'message': 'Not found', 'code': '404'})
+#     return jsonify({'message': 'Not found', 'code': '444'})
 
 
 if __name__ == '__main__':
