@@ -8,14 +8,14 @@ from ma import ma
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
-api = Api(app)
-api.add_namespace(course_ns)
-
 
 @app.before_first_request
 def create_tables():
     db.create_all()
 
+
+api = Api(app)
+api.add_namespace(course_ns)
 
 db.init_app(app)
 ma.init_app(app)
