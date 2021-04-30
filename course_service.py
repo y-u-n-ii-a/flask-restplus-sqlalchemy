@@ -1,45 +1,38 @@
-from datetime import datetime
+from typing import List
 
 from db import db
+from course_model1 import CourseModel as Course, deserialize
 
 
-class CourseModel(db.Model):
-    __tablename__ = 'course'
+class CourseService:
+    @staticmethod
+    def get_all() -> List[Course]:
+        return Course.query.all()
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(100))
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
-    number_of_lectures = db.Column(db.Integer)
+    @staticmethod
+    def get_by_id(course_id: int) -> Course:
+        return Course.query.get(course_id).serialize()
 
-    def __init__(self, name, start_date, end_date, number_of_lectures):
-        self.name = name
-        self.start_date = start_date
-        self.end_date = end_date
-        self.number_of_lectures = number_of_lectures
+    # @staticmethod
+    # def update(course: Course, course_change_updates: courseInterface) -> course:
+    #     course.update(course_change_updates)
+    #     db.session.commit()
+    #     return course
 
-    def __repr__(self):
-        return '<Course %r>' % self.id
+    @staticmethod
+    def delete_by_id(course_id: int) -> List[int]:
+        course = Course.query.filter(Course.id == course_id).first_or_404()
+        if not course:
+            return []
+        db.session.delete(course)
+        db.session.commit()
+        return [course_id]
 
-    # TODO: correct serialization
-    def serialize(self):
-        return {'name': self.name,
-                'start_date': self.start_date,
-                'end_date': self.end_date,
-                'number_of_lectures': self.number_of_lectures
-                }
-
-
-def deserialize(request):
-    name = request.json['name']
-    start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
-    end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
-    number_of_lectures = request.json['number_of_lectures']
-    return CourseModel(name, start_date, end_date, number_of_lectures)
-
-
-def serialize_list(courses):
-    courses_list = {}
-    for course in courses:
-        courses_list['Course %r' % course.id] = course.serialize()
-    return courses_list
+    @staticmethod
+    def create(request) -> Course:
+        new_course = deserialize(request)
+        db.session.add(new_course)
+        db.session.commit()
+        # except:
+        #     return abort(400)
+        return new_course

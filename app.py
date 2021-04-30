@@ -3,8 +3,9 @@ from datetime import datetime
 from flask import Flask, request, jsonify, abort
 from flask_restplus import Api, Resource, fields
 
-from course_service import CourseModel, serialize_list, deserialize
+from course_model1 import serialize_list, deserialize
 from db import db
+from course_service import CourseService
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -14,6 +15,8 @@ app.config.from_pyfile('config.py')
 def create_tables():
     db.create_all()
 
+# TODO: add marshmallow
+# TODO: add blueprints
 
 api = Api(app)
 db.init_app(app)
@@ -30,51 +33,54 @@ course_model = api.model('Course', {
 
 
 @ns.route('/')
-class CourseList(Resource):
+class CourseListResource(Resource):
     @ns.doc('Get list of courses')
     def get(self):
-        courses_list = db.session.query(CourseModel).all()
-        return jsonify(serialize_list(courses_list))
+        return jsonify(serialize_list(CourseService.get_all()))
 
     @ns.doc('Add new course')
     @ns.expect(course_model)
     def post(self):
-        try:
-            new_course = deserialize(request)
-            db.session.add(new_course)
-            db.session.commit()
-        except:
-            return abort(400)
+        print(request.data)
+        return jsonify(CourseService.create(request).serialize())
 
 
-# TODO: handle error if the element doesn't exist
+# TODO: add the last request
+
+# @ns.route('/<name>')
+# class D(Resource):
+#     def get(self, name, start_date, end_date):
+#         courses_list = db.session.query(CourseModel).filter(CourseModel.name == name).all()
+#         courses_list = db.session.query(CourseModel).filter(CourseModel.start_date=start_date)
+#         return jsonify(serialize_list(courses_list))
+
+
 @ns.route('/<int:id>')
-class Course(Resource):
+class CourseResource(Resource):
     @ns.doc('Get course by id', params={'id': 'Id'})
     def get(self, id):
-        course = db.session.query(CourseModel).filter(CourseModel.id == id).first_or_404()
-        return jsonify(course.serialize())
+        return jsonify(CourseService.get_by_id(id))
 
-    @ns.doc('Change course', params={'id': 'Id'})
-    @ns.expect(course_model)
-    def put(self, id):
-        course = db.session.query(CourseModel).filter(CourseModel.id == id).first_or_404()
-
-        # TODO: provide for the addition of not all fields
-        course.name = request.json['name']
-        course.start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
-        course.end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
-        course.number_of_lectures = request.json['number_of_lectures']
-
-        db.session.commit()
+    # @ns.doc('Change course', params={'id': 'Id'})
+    # @ns.expect(course_model)
+    # def put(self, id):
+    #     course = db.session.query(CourseModel).filter(CourseModel.id == id).first_or_404()
+    #
+    #     # TODO: provide for the addition of not all fields
+    #     course.name = request.json['name']
+    #     course.start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
+    #     course.end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
+    #     course.number_of_lectures = request.json['number_of_lectures']
+    #
+    #     db.session.commit()
 
     @ns.doc('Delete course by id', params={'id': 'Id'})
     def delete(self, id):
-        course = db.session.query(CourseModel).filter(CourseModel.id == id).first_or_404()
-        db.session.delete(course)
-        db.session.commit()
+        CourseService.delete_by_id(id)
+        return jsonify(dict(status='Success', id=id))
 
 
+# TODO: add error handling
 # @ns.errorhandler(exception=exceptions.NotFound)
 # def course_not_found(error):
 #     return jsonify({'message': 'Not found', 'code': '404'})
