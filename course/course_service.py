@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import List
 
+from sqlalchemy import sql
+
 from course.course_model import CourseModel as Course
 from course.course_schema import course_schema, courses_schema
 from db import db
@@ -8,8 +10,9 @@ from db import db
 
 class CourseService:
     @staticmethod
-    def get_all() -> List[Course]:
-        return courses_schema.jsonify(Course.query.all())
+    def get_all(**kwargs) -> List[Course]:
+        courses = Course.query.filter_by(sql.and_(**kwargs)).all()
+        return courses_schema.jsonify(courses)
 
     @staticmethod
     def get_by_id(course_id: int) -> Course:
@@ -49,6 +52,4 @@ class CourseService:
         new_course = Course(name, start_date, end_date, number_of_lectures)
         db.session.add(new_course)
         db.session.commit()
-        # except:
-        #     return abort(400)
         return course_schema.jsonify(new_course)

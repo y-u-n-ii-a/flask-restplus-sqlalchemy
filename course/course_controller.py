@@ -16,9 +16,9 @@ course_expected_model = ns.model('Course', {
 
 @ns.route('/')
 class CourseListResource(Resource):
-    @ns.doc('Get list of courses')
+    @ns.doc('Get list of courses with filter')
     def get(self):
-        return CourseService.get_all()
+        return CourseService.get_all(name=request.args.get('name'))
 
     @ns.doc('Add new course')
     @ns.expect(course_expected_model)
@@ -26,32 +26,19 @@ class CourseListResource(Resource):
         return CourseService.create(request)
 
 
-# TODO: add the last request
-# @ns.route('/<name>')
-# class D(Resource):
-#     def get(self, name, start_date, end_date):
-#         courses_list = db.session.query(CourseModel).filter(CourseModel.name == name).all()
-#         courses_list = db.session.query(CourseModel).filter(CourseModel.start_date=start_date)
-#         return jsonify(serialize_list(courses_list))
-
-
 @ns.route('/<int:id>')
+@ns.param('id', 'The course identifier')
 class CourseResource(Resource):
-    @ns.doc('Get course by id', params={'id': 'Id'})
+    @ns.doc('Get course by id')
     def get(self, id: int):
         return CourseService.get_by_id(id)
 
-    @ns.doc('Change course', params={'id': 'Id'})
-    @ns.expect()
+    @ns.doc('Change the course')
+    @ns.expect(course_expected_model)
     def put(self, id: int):
         pass
 
-    @ns.doc('Delete course by id', params={'id': 'Id'})
+    @ns.doc('Delete course by id')
     def delete(self, id: int):
         CourseService.delete_by_id(id)
         return jsonify(dict(status='Success', id=id))
-
-# # TODO: add error handling
-# @ns.errorhandler(marshmallow.exceptions.ValidationError)
-# def course_not_found(error):
-#     return jsonify({'message': 'Not found', 'code': '444'})
