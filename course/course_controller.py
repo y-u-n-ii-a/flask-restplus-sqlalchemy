@@ -18,6 +18,7 @@ course_expected_model = ns.model('Course', {
 class CourseListResource(Resource):
     @ns.doc('Get list of courses with filter')
     def get(self):
+        # TODO: fix filters
         return CourseService.get_all(name=request.args.get('name'))
 
     @ns.doc('Add new course')
@@ -36,7 +37,7 @@ class CourseResource(Resource):
     @ns.doc('Change the course')
     @ns.expect(course_expected_model)
     def put(self, id: int):
-        pass
+        CourseService.update(id, request)
 
     @ns.doc('Delete course by id')
     def delete(self, id: int):

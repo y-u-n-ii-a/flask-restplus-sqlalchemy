@@ -19,19 +19,16 @@ class CourseService:
         course = Course.query.filter(Course.id == course_id).first_or_404()
         return course_schema.jsonify(course)
 
-    # @staticmethod
-    # def update(course: Course, course_change_updates: courseInterface) -> course:
-    #     course.update(course_change_updates)
-    #     db.session.commit()
-    #     return course
-
-    #     course = db.session.query(CourseModel).filter(CourseModel.id == id).first_or_404()
-    #     # TODO: provide for the addition of not all fields
-    #     course.name = request.json['name']
-    #     course.start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
-    #     course.end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
-    #     course.number_of_lectures = request.json['number_of_lectures']
-    #     db.session.commit()
+    @staticmethod
+    def update(id, request) -> Course:
+        course = db.session.query(Course).filter(Course.id == id).first_or_404()
+        # TODO: provide for the addition of not all fields
+        course.name = request.json['name']
+        course.start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
+        course.end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
+        course.number_of_lectures = request.json['number_of_lectures']
+        db.session.commit()
+        return course_schema.jsonify(course)
 
     @staticmethod
     def delete_by_id(course_id: int) -> List[int]:
