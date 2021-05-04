@@ -1,6 +1,6 @@
 # REST API With Flask & SQL Alchemy
 
-> Simple API using Python Flask, SQLAlchemy and Flask-RESTPlus
+> Simple API using Python Flask, SQLAlchemy, Marshmallow and Flask-RESTPlus
 
 ## Quick Start
 #### Clone the Project
@@ -42,5 +42,4 @@ $ flask run
 * GET     /course/:id
 * POST    /course
 * PUT     /course/:id
-* DELETE  /course
 * DELETE  /course/:id
