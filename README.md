@@ -6,7 +6,7 @@
 #### Clone the Project
 
 ``` bash
-$ git clone https://github.com/y-u-n-ii-a/flask-restplus-server-example.git
+$ git clone https://github.com/y-u-n-ii-a/flask-restplus-sqlalchemy.git
 ```
 
 #### Setup Environment
