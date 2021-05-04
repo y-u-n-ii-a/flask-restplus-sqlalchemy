@@ -1,5 +1,9 @@
 from ma import ma
 
+"""
+Marshmallow schema for (de)serialization
+"""
+
 
 class CourseSchema(ma.Schema):
     class Meta:

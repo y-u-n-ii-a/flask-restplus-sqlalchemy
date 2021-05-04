@@ -2,6 +2,10 @@ from datetime import datetime
 
 from db import db
 
+"""
+Database model for interaction with SQLAlchemy database
+"""
+
 
 class CourseModel(db.Model):
     __tablename__ = 'course'

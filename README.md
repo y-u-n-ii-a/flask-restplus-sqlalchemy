@@ -43,3 +43,8 @@ $ flask run
 * POST    /course
 * PUT     /course/:id
 * DELETE  /course/:id
+
+## Request with filter (example):
+http://127.0.0.1:5000/course/?name=yuniia&start_more=01-01-01&start_less=02-02-02
+
+Be attentive, you need to use date format 'dd-mm-yy'.
