@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import sql
-
 from course.course_model import CourseModel as Course
 from course.course_schema import course_schema, courses_schema
 from db import db
@@ -11,8 +9,14 @@ from db import db
 class CourseService:
     @staticmethod
     def get_all(**kwargs) -> List[Course]:
-        courses = Course.query.filter_by(sql.and_(**kwargs)).all()
-        return courses_schema.jsonify(courses)
+        courses = Course.query
+        if 'name' in kwargs:
+            courses = courses.filter(Course.name == kwargs['name'])
+        if 'start_more' in kwargs:
+            courses = courses.filter(Course.start_date >= CourseService._convert_date(kwargs['start_more']))
+        if 'start_less' in kwargs:
+            courses = courses.filter(Course.start_date <= CourseService._convert_date(kwargs['start_less']))
+        return courses_schema.jsonify(courses.all())
 
     @staticmethod
     def get_by_id(course_id: int) -> Course:
@@ -21,32 +25,33 @@ class CourseService:
 
     @staticmethod
     def update(id, request) -> Course:
-        course = db.session.query(Course).filter(Course.id == id).first_or_404()
-        # TODO: provide for the addition of not all fields
-        course.name = request.json['name']
-        course.start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
-        course.end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
-        course.number_of_lectures = request.json['number_of_lectures']
+        new_data = course_schema.loads(request.data)
+        course = db.session.query(Course).filter_by(id=id).update(CourseService._prepare_data(new_data))
         db.session.commit()
         return course_schema.jsonify(course)
 
     @staticmethod
     def delete_by_id(course_id: int) -> List[int]:
         course = Course.query.filter(Course.id == course_id).first_or_404()
-
         db.session.delete(course)
         db.session.commit()
         return [course_id]
 
     @staticmethod
     def create(request) -> Course:
-        name = request.json['name']
-        start_date = datetime.strptime(request.json['start_date'], '%d/%m/%y')
-        end_date = datetime.strptime(request.json['end_date'], '%d/%m/%y')
-        number_of_lectures = request.json['number_of_lectures']
-
-        # new_course = course_schema.load(request)
-        new_course = Course(name, start_date, end_date, number_of_lectures)
-        db.session.add(new_course)
+        new_course = course_schema.loads(request.data)
+        db.session.add(Course(**new_course))
         db.session.commit()
         return course_schema.jsonify(new_course)
+
+    @staticmethod
+    def _prepare_data(data):
+        if 'start_date' in data:
+            data['start_date'] = CourseService._convert_date(data['start_date'])
+        if 'end_date' in data:
+            data['end_date'] = CourseService._convert_date(data['end_date'])
+        return data
+
+    @staticmethod
+    def _convert_date(date_string):
+        return datetime.strptime(date_string, '%d-%m-%y')
