@@ -7,3 +7,7 @@ Flask-SQLAlchemy>=2.4,<3
 werkzeug>=0.15,<0.17
 flask-marshmallow~=0.14.0
 marshmallow-sqlalchemy~=0.24.3
+
+black
+mypy
+flake8

@@ -17,12 +17,16 @@ class CourseService:
         :return: List of courses.
         """
         courses = Course.query
-        if 'name' in kwargs:
-            courses = courses.filter(Course.name == kwargs['name'])
-        if 'start_more' in kwargs:
-            courses = courses.filter(Course.start_date >= CourseService._convert_date(kwargs['start_more']))
-        if 'start_less' in kwargs:
-            courses = courses.filter(Course.start_date <= CourseService._convert_date(kwargs['start_less']))
+        if "name" in kwargs:
+            courses = courses.filter(Course.name == kwargs["name"])
+        if "start_more" in kwargs:
+            courses = courses.filter(
+                Course.start_date >= CourseService._convert_date(kwargs["start_more"])
+            )
+        if "start_less" in kwargs:
+            courses = courses.filter(
+                Course.start_date <= CourseService._convert_date(kwargs["start_less"])
+            )
         return courses_schema.jsonify(courses.all())
 
     @staticmethod
@@ -44,7 +48,11 @@ class CourseService:
         :return: updated course
         """
         new_data = course_schema.loads(request.data)
-        course = db.session.query(Course).filter_by(id=id).update(CourseService._prepare_data(new_data))
+        course = (
+            db.session.query(Course)
+            .filter_by(id=id)
+            .update(CourseService._prepare_data(new_data))
+        )
         db.session.commit()
         return course_schema.jsonify(course)
 
@@ -74,10 +82,10 @@ class CourseService:
 
     @staticmethod
     def _prepare_data(data):
-        if 'start_date' in data:
-            data['start_date'] = CourseService._convert_date(data['start_date'])
-        if 'end_date' in data:
-            data['end_date'] = CourseService._convert_date(data['end_date'])
+        if "start_date" in data:
+            data["start_date"] = CourseService._convert_date(data["start_date"])
+        if "end_date" in data:
+            data["end_date"] = CourseService._convert_date(data["end_date"])
         return data
 
     @staticmethod
@@ -87,4 +95,4 @@ class CourseService:
         :param date_string: date in string format
         :return: date in python datetime format
         """
-        return datetime.strptime(date_string, '%d-%m-%y')
+        return datetime.strptime(date_string, "%d-%m-%y")
