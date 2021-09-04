@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import List
 
-from course.course_model import CourseModel as Course
-from course.course_schema import course_schema, courses_schema
+from course.models import CourseModel as Course
+from course.schemas import course_schema, courses_schema
 from db import db
 
 

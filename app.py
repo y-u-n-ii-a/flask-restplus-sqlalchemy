@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restplus import Api
 
-from course.course_controller import ns as course_ns
+from course.views import ns as course_ns
 from db import db
 from ma import ma
 

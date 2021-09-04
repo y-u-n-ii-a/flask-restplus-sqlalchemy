@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_restplus import Namespace, Resource, fields
 
-from course.course_service import CourseService
+from course.services import CourseService
 
 ns = Namespace("course", description="Course operations")
 
