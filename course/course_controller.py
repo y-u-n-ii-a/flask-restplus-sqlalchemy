@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import jsonify, request
 from flask_restplus import Namespace, Resource, fields
 
 from course.course_service import CourseService

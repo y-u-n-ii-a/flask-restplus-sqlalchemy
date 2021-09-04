@@ -11,3 +11,4 @@ marshmallow-sqlalchemy~=0.24.3
 black
 mypy
 flake8
+isort
